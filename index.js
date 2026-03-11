@@ -82,6 +82,12 @@ app.delete('/employees/:id', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Employee Management API',
+    endpoints: ['/employees', '/employees/:id', '/employees/search']
+  });
+});
 app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
