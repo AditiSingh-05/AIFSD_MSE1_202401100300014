@@ -5,6 +5,27 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head><title>Library Management API</title></head>
+      <body>
+        <h1>Library Management Backend</h1>
+        <p>API to manage books for a university library.</p>
+        <h2>Available Endpoints</h2>
+        <ul>
+          <li>POST /books - Add a new book</li>
+          <li>GET /books - Get all books</li>
+          <li>GET /books/:id - Get book by ID</li>
+          <li>PUT /books/:id - Update book</li>
+          <li>DELETE /books/:id - Delete book</li>
+          <li>GET /books/search?title=&lt;query&gt; - Search by title (also supports author)</li>
+        </ul>
+      </body>
+    </html>
+  `);
+});
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.log(err));
