@@ -9,85 +9,84 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.log(err));
 
-const employeeSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  phoneNumber: { type: String, required: true },
-  department: { type: String, required: true },
-  designation: { type: String, required: true },
-  salary: { type: Number, required: true, min: 0 },
-  dateOfJoining: { type: Date, required: true },
-  employmentType: { type: String, enum: ['Full-time', 'Part-time', 'Contract'] },
-  status: { type: String, default: 'Active' }
+const bookSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  author: { type: String, required: true },
+  isbn: { type: String, required: true, unique: true },
+  genre: { type: String, required: true },
+  publisher: { type: String, required: true },
+  publicationYear: { type: Number },
+  totalCopies: { type: Number, required: true, min: 1 },
+  availableCopies: { type: Number },
+  shelfLocation: { type: String },
+  bookType: { type: String, enum: ['Reference', 'Circulating'] },
+  status: { type: String, default: 'Available' }
 });
 
-const Employee = mongoose.model('Employee', employeeSchema);
+const Book = mongoose.model('Book', bookSchema);
 
-app.post('/employees', async (req, res) => {
+app.post('/books', async (req, res) => {
   try {
-    const employee = new Employee(req.body);
-    const saved = await employee.save();
+    const book = new Book(req.body);
+    const saved = await book.save();
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-app.get('/employees/search', async (req, res) => {
+app.get('/books/search', async (req, res) => {
   try {
-    const { name } = req.query;
-    const employees = await Employee.find({ fullName: { $regex: name, $options: 'i' } });
-    res.status(200).json(employees);
+    const { title, author } = req.query;
+    let query = {};
+    if (title) query.title = { $regex: title, $options: 'i' };
+    if (author) query.author = { $regex: author, $options: 'i' };
+    const books = await Book.find(query);
+    res.status(200).json(books);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-app.get('/employees', async (req, res) => {
+app.get('/books', async (req, res) => {
   try {
-    const employees = await Employee.find();
-    res.status(200).json(employees);
+    const books = await Book.find();
+    res.status(200).json(books);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-app.get('/employees/:id', async (req, res) => {
+app.get('/books/:id', async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
-    if (!employee) return res.status(404).json({ message: 'Employee not found' });
-    res.status(200).json(employee);
+    const book = await Book.findById(req.params.id);
+    if (!book) return res.status(404).json({ message: 'Book not found' });
+    res.status(200).json(book);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-app.put('/employees/:id', async (req, res) => {
+app.put('/books/:id', async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!employee) return res.status(404).json({ message: 'Employee not found' });
-    res.status(200).json(employee);
+    const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!book) return res.status(404).json({ message: 'Book not found' });
+    res.status(200).json(book);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-app.delete('/employees/:id', async (req, res) => {
+app.delete('/books/:id', async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
-    if (!employee) return res.status(404).json({ message: 'Employee not found' });
-    res.status(200).json({ message: 'Employee deleted successfully' });
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.status(404).json({ message: 'Book not found' });
+    res.status(200).json({ message: 'Book deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Employee Management API',
-    endpoints: ['/employees', '/employees/:id', '/employees/search']
-  });
-});
 app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
