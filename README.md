@@ -1,4 +1,4 @@
-# Employee Management — Backend
+# Library Management — Backend
 
 Simple Node.js backend for managing library data .
 
